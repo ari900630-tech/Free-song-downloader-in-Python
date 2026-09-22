@@ -11,6 +11,24 @@ DOWNLOAD_DIR = Path("music_downloads")
 DOWNLOAD_DIR.mkdir(exist_ok=True)
 
 
+def get_cookiefile():
+    return os.environ.get("YOUTUBE_COOKIES") or os.environ.get("YOUTUBE_COOKIE_FILE")
+
+
+def yt_common_opts():
+    opts = {
+        "quiet": True,
+        "no_warnings": True,
+        "extract_flat": "in_playlist",
+        "default_search": "ytsearch",
+        "skip_download": True,
+    }
+    cookiefile = get_cookiefile()
+    if cookiefile and os.path.exists(cookiefile):
+        opts["cookiefile"] = cookiefile
+    return opts
+
+
 def page(title: str, body: str) -> str:
     return f"""<!doctype html>
 <html lang="he" dir="rtl">
@@ -63,13 +81,7 @@ def page(title: str, body: str) -> str:
 
 
 def search_songs(query: str):
-    search_opts = {
-        "quiet": True,
-        "extract_flat": "in_playlist",
-        "default_search": "ytsearch",
-        "skip_download": True,
-    }
-    with YoutubeDL(search_opts) as ydl:
+    with YoutubeDL(yt_common_opts()) as ydl:
         results = ydl.extract_info(f"ytsearch15:{query}", download=False)
     entries = results.get("entries", []) if isinstance(results, dict) else []
     return [entry for entry in entries if entry]
@@ -95,6 +107,7 @@ def index():
           <button type="submit">חיפוש</button>
         </form>
         <p>הקלד שם של זמר או שיר כדי לחפש ולבחור שירים להורדה.</p>
+        <p><small>אם YouTube מחזיר "Sign in to confirm you're not a bot", יש להכניס משתנה סביבה <b>YOUTUBE_COOKIES</b> עם נתיב לקובץ cookies.</small></p>
         """,
     )
 
@@ -151,6 +164,10 @@ def download():
         "no_warnings": True,
         "noplaylist": True,
     }
+
+    cookiefile = get_cookiefile()
+    if cookiefile and os.path.exists(cookiefile):
+        download_opts["cookiefile"] = cookiefile
 
     try:
         with YoutubeDL(download_opts) as ydl:
@@ -228,6 +245,9 @@ def cli_download_mode(query: str, selection: str):
         "no_warnings": True,
         "noplaylist": True,
     }
+    cookiefile = get_cookiefile()
+    if cookiefile and os.path.exists(cookiefile):
+        download_opts["cookiefile"] = cookiefile
 
     with YoutubeDL(download_opts) as ydl:
         ydl.download(urls)

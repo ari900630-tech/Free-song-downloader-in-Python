@@ -234,7 +234,6 @@ def cli_download_mode(query: str, selection: str):
 
 
 if __name__ == "__main__":
-    # GitHub Actions / CLI usage still works if arguments are passed.
     if len(sys.argv) > 1:
         mode = sys.argv[1]
         if mode == "search":

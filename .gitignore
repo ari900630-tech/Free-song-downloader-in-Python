@@ -1,0 +1,6 @@
+# Ignore local secrets and generated downloads
+youtube_cookies.txt
+*.cookies.txt
+cookies.txt
+music_downloads/
+.env

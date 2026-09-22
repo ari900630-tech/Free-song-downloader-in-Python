@@ -1,1 +1,1 @@
-web: python download_script.py
+web: gunicorn download_script:app
